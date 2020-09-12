@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import "./App.css";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
-import Typography from "@material-ui/core/Typography";
+// import Typography from "@material-ui/core/Typography";
 import Toolbar from "@material-ui/core/Toolbar";
 import { Blob } from "react-blob";
 import Wave from "react-wavify";
@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   app: {
-    // position: "relative",
+    height: "100%",
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -26,7 +26,12 @@ const useStyles = makeStyles((theme) => ({
     // color: "#ffffff",
   },
   content: {
-    height: "80vh",
+    minHeight: "80vh",
+  },
+  displayNoneSmDown: {
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    },
   },
 }));
 
@@ -35,6 +40,8 @@ const BackgroundBlob = ({ style, props, children }) => (
     size="100vh"
     style={{
       position: "absolute",
+      maxWidth: "70vw",
+      maxHeight: "70vw",
       top: "-15%",
       right: "-15%",
       zIndex: -1,
@@ -65,6 +72,7 @@ const FixedWave = () => (
 
 function App() {
   const classes = useStyles();
+  const [index, setIndex] = useState(0);
 
   return (
     <div className="app">
@@ -80,15 +88,18 @@ function App() {
             Conversor Biogás - UNIDO
           </Typography> */}
           <span style={{ flexGrow: 1 }} />
-          <img alt="unido" src="unido_logo.png" />
+          <img
+            alt="unido"
+            src="unido_logo.png"
+            className={classes.displayNoneSmDown}
+          />
         </Toolbar>
       </AppBar>
       <BackgroundBlob>
         <img src="lonas.jpg" alt="lonas" />
       </BackgroundBlob>
       <div className={classes.content}>
-        {/* <Converter /> */}
-        <LandingPage />
+        {index === 0 ? <LandingPage setIndex={setIndex} /> : <Converter />}
       </div>
       <FixedWave />
     </div>

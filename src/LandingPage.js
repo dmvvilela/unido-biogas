@@ -10,8 +10,11 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     height: "100%",
     width: "100%",
-    overflowX: "hidden",
-    overflowY: "hidden",
+  },
+  grid: {
+    position: "absolute",
+    top: "50%",
+    transform: "translateY(-50%)",
   },
   subtitle: {
     color: theme.palette.text.secondary,
@@ -23,38 +26,51 @@ const useStyles = makeStyles((theme) => ({
   cta: {
     color: "#ffffff",
     fontWeight: "bold",
+    margin: theme.spacing(0.5),
   },
 }));
 
-const LandingPage = (props) => {
+const LandingPage = ({ setIndex }) => {
   const classes = useStyles();
 
   return (
-    <Grid
-      container
-      spacing={3}
-      alignContent="center"
-      alignItems="center"
-      justify="center"
-      className={classes.root}
-    >
-      <Grid item xs={12} md={8}>
-        <Typography variant="h2" color="primary" style={{ fontWeight: "bold" }}>
-          Conversor Biogás - UNIDO
-        </Typography>
-        <div>
-          <Typography variant="body1" className={classes.subtitle}>
-            Conheça mais sobre esse biocombustível e entenda como ele se compara
-            com outros tipos: diesel, gás liquefeito de petróleo (GLP) e kWh.
+    <div className={classes.root}>
+      <Grid
+        container
+        spacing={3}
+        alignContent="center"
+        alignItems="center"
+        justify="center"
+        className={classes.grid}
+      >
+        <Grid item xs={12} md={8}>
+          <Typography
+            variant="h2"
+            color="primary"
+            style={{ fontWeight: "bold" }}
+          >
+            Conversor Biogás - UNIDO
           </Typography>
-        </div>
-        <Button variant="contained" color="primary" size="large">
-          <Typography variant="body1" className={classes.cta}>
-            Começar
-          </Typography>
-        </Button>
+          <div>
+            <Typography variant="body1" className={classes.subtitle}>
+              Conheça mais sobre esse biocombustível e entenda como ele se
+              compara com outros tipos de energia: diesel, gás liquefeito de
+              petróleo (GLP) e kWh.
+            </Typography>
+          </div>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => setIndex(1)}
+          >
+            <Typography variant="body1" className={classes.cta}>
+              Começar
+            </Typography>
+          </Button>
+        </Grid>
       </Grid>
-    </Grid>
+    </div>
   );
 };
 

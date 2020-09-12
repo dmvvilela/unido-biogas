@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
-import Box from "@material-ui/core/Box";
 import { makeStyles } from "@material-ui/core/styles";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import TextField from "@material-ui/core/TextField";
@@ -13,6 +12,7 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import Hidden from "@material-ui/core/Hidden";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,23 +23,11 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
     margin: theme.spacing(6),
   },
-  paperWrapper: {
-    position: "absolute",
-    top: "40%",
-    left: "20%",
-  },
   paper: {
-    padding: theme.spacing(3),
-    marginTop: theme.spacing(-4),
-    marginLeft: theme.spacing(6),
-    textAlign: "center",
-    color: theme.palette.text.secondary,
-  },
-  paper2: {
     width: 440,
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(-4),
+    padding: theme.spacing(3),
     marginLeft: theme.spacing(6),
+    marginBottom: theme.spacing(6),
     textAlign: "center",
     color: theme.palette.text.secondary,
   },
@@ -55,9 +43,6 @@ const useStyles = makeStyles((theme) => ({
   textField: {
     width: "40ch",
   },
-  convert: {
-    // color: "#ffffff",
-  },
   fab: {
     margin: theme.spacing(2),
   },
@@ -68,41 +53,70 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Converter = (props) => {
+const Converter = () => {
   const classes = useStyles();
-  const [fDOpen, setFDOpen] = useState(true);
-  const [values, setValues] = useState({
-    amount: "",
-    password: "",
-    weight: "",
-    weightRange: "",
-    showPassword: false,
-  });
-  const [alignment, setAlignment] = useState("left");
+  const [biogas, setBiogas] = useState("");
+  const [other, setOther] = useState("0");
+  const [unit, setUnit] = useState("Diesel");
 
-  const handleAlignment = (event, newAlignment) => {
-    setAlignment(newAlignment);
+  const handleChangeUnit = (event, newUnit) => {
+    setOther(0);
+    setUnit(newUnit);
   };
 
-  const handleChange = (prop) => (event) => {
-    setValues({ ...values, [prop]: event.target.value });
-  };
+  function onChangeBiogas(event) {
+    const value = event.target.value;
+    if (value !== "" && isNaN(parseFloat(value.replace(",", ".")))) {
+      return;
+    }
+
+    setBiogas(value);
+  }
+
+  function convertUnits() {
+    const bg = parseFloat(biogas.replace(",", "."));
+    let other;
+
+    if (isNaN(bg)) {
+      setOther(0);
+      return;
+    }
+
+    switch (unit) {
+      case "Diesel":
+        other = bg * 0.69;
+        break;
+      case "GLP":
+        other = bg * 0.53;
+        break;
+      case "kWh":
+        other = bg * 2.07;
+        break;
+      default:
+        return;
+    }
+
+    setOther(other.toFixed(2).replace(".", ","));
+  }
 
   useEffect(() => {
-    introJs().setOptions({
-      skipLabel: "Pular",
-      nextLabel: "Próximo",
-      doneLabel: "Pronto",
-      prevLabel: "Anterior",
-    });
-    // .start();
+    setTimeout(() => {
+      introJs()
+        .setOptions({
+          skipLabel: "Pular",
+          nextLabel: "Próximo",
+          doneLabel: "Pronto",
+          prevLabel: "Anterior",
+        })
+        .start();
+    }, 500);
   }, []);
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
-      {/* <Box justifyContent="center" alignItems="center" flexGrow={1}> */}
-      <Grid container spacing={3} style={{ width: "100%", height: "100%" }}>
-        <Grid item xs={12}>
+    <div>
+      <Grid container spacing={3}>
+        <Grid item xs={1} />
+        <Grid item xs={11}>
           <Typography variant="h2" color="primary" className={classes.title}>
             Conversor Biogás - UNIDO
           </Typography>
@@ -110,31 +124,41 @@ const Converter = (props) => {
             Converta volume de biogás para Diesel, GLP ou kWH.
           </Typography>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <div className={classes.paperWrapper}>
+        <Grid
+          container
+          spacing={3}
+          alignContent="center"
+          alignItems="center"
+          justify="center"
+        >
+          <Grid item xs={1} />
+          <Grid item xs={11} md={5}>
+            {/* <div className={classes.paperWrapper}> */}
             <Paper className={classes.paper}>
               <div>
                 <ToggleButtonGroup
-                  value={alignment}
+                  value={unit}
                   exclusive
-                  onChange={handleAlignment}
-                  aria-label="text alignment"
+                  onChange={handleChangeUnit}
+                  aria-label="conversion unit"
                   data-intro="Escolha para qual unidade deseja converter o biogás."
                 >
-                  <ToggleButton value="left" aria-label="left aligned">
+                  <ToggleButton value="Diesel" aria-label="left aligned">
                     Diesel
                   </ToggleButton>
-                  <ToggleButton value="center" aria-label="centered">
+                  <ToggleButton value="GLP" aria-label="centered">
                     GLP
                   </ToggleButton>
-                  <ToggleButton value="right" aria-label="right aligned">
+                  <ToggleButton value="kWh" aria-label="right aligned">
                     kWh
                   </ToggleButton>
                 </ToggleButtonGroup>
               </div>
               <TextField
                 label="Biogás"
-                id="standard-start-adornment"
+                id="biogas"
+                value={biogas}
+                onChange={onChangeBiogas}
                 className={clsx(classes.margin, classes.textField)}
                 InputProps={{
                   endAdornment: (
@@ -147,49 +171,59 @@ const Converter = (props) => {
                 <Fab
                   color="primary"
                   className={classes.fab}
+                  onClick={convertUnits}
                   data-intro="Clique aqui para realizar a conversão."
                 >
                   <ShuffleIcon className={classes.convert} />
                 </Fab>
               </div>
               <TextField
-                label="Biogás"
-                id="standard-start-adornment"
+                label={unit}
+                id="unit"
+                value={other}
                 className={clsx(classes.marginBottom, classes.textField)}
                 InputProps={{
                   endAdornment: (
-                    <InputAdornment position="end">m³</InputAdornment>
+                    <InputAdornment position="end">
+                      {unit === "Diesel" ? "L" : unit === "GLP" ? "Kg" : "kWh"}
+                    </InputAdornment>
                   ),
                 }}
                 disabled
                 data-intro="Verifique o resultado de sua conversão na unidade escolhida."
               />
             </Paper>
-          </div>
-        </Grid>
-        <Grid item md={2}></Grid>
-        <Grid item xs={12} md={4}>
-          {/* <div className={classes.paperWrapper}> */}
-          <Paper
-            className={classes.paper2}
-            data-intro="Aprenda curiosidades sobre cada unidade convertida."
-          >
-            <Typography
-              variant="h5"
-              color="secondary"
-              className={classes.title}
+            {/* </div> */}
+          </Grid>
+          <Hidden lgUp>
+            <Grid item xs={1} />
+          </Hidden>
+          <Grid item xs={11} md={5}>
+            {/* <div className={classes.paperWrapper}> */}
+            <Paper
+              className={classes.paper}
+              data-intro="Aprenda curiosidades sobre cada unidade convertida."
             >
-              Você Sabia?
-            </Typography>
-            <Divider />
-            <Typography variant="body1" className={classes.title}>
-              O consumo médio de energia de uma família no brasil é de X kwH.
-            </Typography>
-          </Paper>
-          {/* </div> */}
+              <Typography
+                variant="h5"
+                color="secondary"
+                className={classes.title}
+              >
+                Você Sabia?
+              </Typography>
+              <Divider />
+              <Typography variant="body1" className={classes.title}>
+                {unit === "Diesel"
+                  ? "Pesquisa realizada pela Universidade da Califórnia mostra que os veículos movidos a Diesel são responsáveis por 80% da poluição no país."
+                  : unit === "GLP"
+                  ? "Por ser transportado de forma prática, hoje o GLP está em todos os municípios brasileiros. A presença de GLP nos lares é maior que água encanada e encanamento."
+                  : "O consumo médio de energia nas residências brasileiras é de 157 kWh, equivalente à 76m³ de biogás."}
+              </Typography>
+            </Paper>
+            {/* </div> */}
+          </Grid>
         </Grid>
       </Grid>
-      {/* </Box> */}
     </div>
   );
 };
